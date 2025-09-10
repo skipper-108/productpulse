@@ -1,12 +1,13 @@
 """ProductPulse Streamlit dashboard."""
 
-# ── Make top-level `src.*` imports work on Streamlit Cloud ──────────
+# ── Make top-level  import src.*  work on Streamlit Cloud ────────────
 import pathlib, sys
-ROOT = pathlib.Path(__file__).resolve().parents[1]
-if str(ROOT) not in sys.path:
+
+ROOT = pathlib.Path(__file__).resolve().parents[2]      # project root (…/productpulse)
+if str(ROOT) not in sys.path:                          # add once
     sys.path.append(str(ROOT))
 
-# ── Standard libs ───────────────────────────────────────────────────
+# ── Third-party libs ─────────────────────────────────────────────────
 import streamlit as st
 import plotly.express as px
 
@@ -15,7 +16,6 @@ from src.analysis import rfm_segmentation, cohort_retention
 import src.modeling as mdl
 
 # ────────────────────────────────────────────────────────────────────
-# Streamlit page config & title
 st.set_page_config(page_title="ProductPulse Dashboard", layout="wide")
 st.title("📊 ProductPulse – Demo Dashboard")
 
@@ -60,14 +60,13 @@ with tab_cohort:
     st.subheader("Weekly Retention Heat-map")
 
     retention = cohort_retention()
-    # Plotly / Streamlit can’t JSON-serialize PeriodIndex
     retention_plot = retention.copy()
-    retention_plot.index = retention_plot.index.astype("string")
+    retention_plot.index = retention_plot.index.astype("string")  # Plotly JSON-safe
 
     fig_cohort = px.imshow(
         retention_plot,
         aspect="auto",
         color_continuous_scale="Blues",
-        labels=dict(x="Week age", y="Signup week", color="Retention %")
+        labels=dict(x="Week age", y="Signup week", color="Retention %"),
     )
     st.plotly_chart(fig_cohort, use_container_width=True)
