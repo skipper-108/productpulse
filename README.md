@@ -3,7 +3,6 @@
 # 📊 ProductPulse  
 **Full-stack product-analytics stack — Python · Streamlit · SQLite**
 
-![Dashboard screenshot](docs/screenshot_dashboard.png)
 
 </div>
 
