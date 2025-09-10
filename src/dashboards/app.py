@@ -1,27 +1,20 @@
 """ProductPulse Streamlit dashboard."""
 # ──────────────────────────────────────────────────────────────────────
-# Make  import src.*  work everywhere
-import pathlib, sys
+# make  `import src.*`  work everywhere (Streamlit Cloud, local, etc.)
+import pathlib, sys, runpy, streamlit as st, plotly.express as px
 
-ROOT = pathlib.Path(__file__).resolve().parents[2]      # …/productpulse
-if str(ROOT) not in sys.path:
-    sys.path.append(str(ROOT))
-
-DB_PATH = ROOT / "data" / "app.db"                      # SQLite store
+ROOT = pathlib.Path(__file__).resolve().parents[2]  # …/productpulse
+sys.path.append(str(ROOT)) if str(ROOT) not in sys.path else None
+DB_PATH = ROOT / "data" / "app.db"                  # SQLite store
 
 # ── build SQLite on first boot ───────────────────────────────────────
-import runpy, importlib, streamlit as st
-
 if not DB_PATH.exists():
     st.info("Creating local database – first-time setup ⏳")
     # 1) generate dummy CSVs
     runpy.run_path(str(ROOT / "scripts" / "generate_dummy_data.py"))
-    # 2) run ETL job to populate SQLite
-    importlib.import_module("src.etl").main()
+    # 2) run ETL job exactly as  `python -m src.etl`
+    runpy.run_module("src.etl", run_name="__main__")
     st.success("SQLite ready – continuing…")
-
-# ── libs ─────────────────────────────────────────────────────────────
-import plotly.express as px
 
 # ── project modules ─────────────────────────────────────────────────
 from src.analysis import rfm_segmentation, cohort_retention
@@ -41,15 +34,19 @@ tab_rfm, tab_cohort = st.tabs(["RFM Segmentation", "Cohort Retention"])
 
 # ── RFM tab ─────────────────────────────────────────────────────────
 with tab_rfm:
-    seg_counts = (rfm["segment"]
-                  .value_counts()
-                  .rename_axis("segment")
-                  .reset_index(name="count"))
+    seg_counts = (
+        rfm["segment"]
+        .value_counts()
+        .rename_axis("segment")
+        .reset_index(name="count")
+    )
     st.plotly_chart(
-        px.bar(seg_counts,
-               x="segment",
-               y="count",
-               labels={"segment": "Segment", "count": "Users"}),
+        px.bar(
+            seg_counts,
+            x="segment",
+            y="count",
+            labels={"segment": "Segment", "count": "Users"},
+        ),
         use_container_width=True,
     )
     st.dataframe(rfm.head(50), use_container_width=True)
@@ -64,14 +61,17 @@ with tab_cohort:
     retention = cohort_retention()
     retention_plot = retention.copy()
     retention_plot.index = retention_plot.index.astype("string")  # JSON-safe
+
     st.plotly_chart(
         px.imshow(
             retention_plot,
             aspect="auto",
             color_continuous_scale="Blues",
-            labels=dict(x="Week age",
-                        y="Signup week",
-                        color="Retention %"),
+            labels={
+                "x": "Week age",
+                "y": "Signup week",
+                "color": "Retention %",
+            },
         ),
         use_container_width=True,
     )
