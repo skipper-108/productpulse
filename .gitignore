@@ -1,0 +1,23 @@
+# --- Python project ---
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Byte-code / caches
+__pycache__/
+*.py[cod]
+
+# Compiled extensions
+*.pyd
+*.so
+*.dll
+
+# Logs & secrets
+*.log
+.streamlit/
+
+# Data outputs
+data/processed/
+data/raw/
+!data/raw/README.md   # keep a tiny readme if you want
