@@ -1,15 +1,15 @@
 """ProductPulse Streamlit dashboard."""
-
-# ── make  import src.*  work everywhere ──────────────────────────────
+# ──────────────────────────────────────────────────────────────────────
+# Make  import src.*  work everywhere
 import pathlib, sys, subprocess
 
-ROOT = pathlib.Path(__file__).resolve().parents[2]     # …/productpulse
+ROOT = pathlib.Path(__file__).resolve().parents[2]          # …/productpulse
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
 
-# ── build SQLite on first boot ───────────────────────────────────────
-from src.config import DB_PATH          # → data/app.db (Path object)
+DB_PATH = ROOT / "data" / "app.db"                          # <── fixed here
 
+# ── build SQLite on first boot ───────────────────────────────────────
 if not DB_PATH.exists():
     print("➕ Creating local database …")
     subprocess.run(["python", "scripts/generate_dummy_data.py"], check=True)
